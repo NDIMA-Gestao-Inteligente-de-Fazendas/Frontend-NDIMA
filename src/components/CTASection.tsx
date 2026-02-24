@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function CTASection() {
     return (
@@ -34,13 +35,14 @@ export default function CTASection() {
                 </p>
                 <br />
                 {/* CTA Button */}
-                <button
+                <Link
+                    to="/cadastro"
                     className="inline-flex items-center gap-3 px-10 py-5 text-lg font-bold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl mb-4"
                     style={{ backgroundColor: '#F7C04A', color: '#123520' }}
                 >
                     Criar Minha Conta Grátis
                     <ArrowRight size={20} />
-                </button>
+                </Link>
 
                 {/* Reassurance text — below the button, centered */}
                 <p className="text-sm" style={{ color: '#9CA3AF' }}>

@@ -1,4 +1,5 @@
 import { ArrowRight, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
     return (
@@ -47,12 +48,13 @@ export default function HeroSection() {
                         </p>
 
                         <div className="flex flex-wrap gap-4 mb-8 justify-center md:justify-start">
-                            <button
+                            <Link
+                                to="/cadastro"
                                 className="inline-flex items-center gap-2 px-8 py-4 text-base font-bold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                                 style={{ backgroundColor: '#F7C04A', color: '#123520' }}
                             >
                                 Começar Grátis Agora <ArrowRight size={18} />
-                            </button>
+                            </Link>
                             <button
                                 className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold rounded-xl border transition-all duration-300 hover:bg-white hover:shadow-md"
                                 style={{ backgroundColor: 'transparent', color: '#1A4D2E', borderColor: '#E5E7EB' }}
@@ -61,7 +63,7 @@ export default function HeroSection() {
                             </button>
                         </div>
 
-                        
+
                     </div>
 
                     {/* Right: Phone mockup */}

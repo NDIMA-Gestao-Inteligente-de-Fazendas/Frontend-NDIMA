@@ -1,5 +1,6 @@
 import { Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,14 +34,14 @@ export default function Header() {
                 <div className="container mx-auto px-7 py-6 flex items-center justify-between"
                     style={{ maxWidth: '100%', minHeight: '72px' }}
                 >
-                    <div className="flex items-center gap-2">
+                    <Link to="/" className="flex items-center gap-2">
                         <img
                             src="img/logotipofinal-04.png"
                             alt="NDIMA Logo"
                             className="w-auto object-contain transition-all duration-500"
                             style={{ height: isScrolled ? '44px' : '56px' }}
                         />
-                    </div>
+                    </Link>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex gap-8 items-center">
@@ -51,18 +52,20 @@ export default function Header() {
 
                     {/* Desktop Actions */}
                     <div className="hidden md:flex gap-3">
-                        <button
+                        <Link
+                            to="/login"
                             className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-all duration-200 hover:bg-white/20"
                             style={{ border: '1px solid rgba(255,255,255,0.4)' }}
                         >
                             Entrar
-                        </button>
-                        <button
+                        </Link>
+                        <Link
+                            to="/cadastro"
                             className="px-5 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                             style={{ backgroundColor: '#F7C04A', color: '#123520', boxShadow: '0 2px 8px rgba(247,192,74,0.3)' }}
                         >
                             Começar Agora
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -86,18 +89,22 @@ export default function Header() {
                         <a href="#tecnologia" className="text-center text-base font-medium text-white hover:text-yellow-300 transition-colors" onClick={() => setIsMenuOpen(false)}>Tecnologia</a>
 
                         <div className="flex flex-col gap-3 mt-2">
-                            <button
-                                className="w-full px-5 py-3 font-semibold text-white rounded-xl transition-all hover:bg-white/20"
+                            <Link
+                                to="/login"
+                                className="text-center w-full px-5 py-3 font-semibold text-white rounded-xl transition-all hover:bg-white/20"
                                 style={{ border: '1px solid rgba(255,255,255,0.4)' }}
+                                onClick={() => setIsMenuOpen(false)}
                             >
                                 Entrar
-                            </button>
-                            <button
-                                className="w-full px-5 py-3 font-bold rounded-xl transition-all"
+                            </Link>
+                            <Link
+                                to="/cadastro"
+                                className="text-center w-full px-5 py-3 font-bold rounded-xl transition-all"
                                 style={{ backgroundColor: '#F7C04A', color: '#123520' }}
+                                onClick={() => setIsMenuOpen(false)}
                             >
                                 Começar Agora
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 )}
