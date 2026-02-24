@@ -83,14 +83,15 @@ function ModuleCard({ mod }: { mod: Module }) {
 
 export default function SolutionSection() {
     return (
-        <section className="py-24 bg-[#F9FAFB]" id="funcionalidades">
+        <section className="py-24 pb-32 bg-[#F9FAFB]" id="funcionalidades">
             <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-5 text-[#111827] font-['Outfit'] tracking-tight">A Plataforma Completa</h2>
-                    <p className="text-xl text-[#4B5563] max-w-[600px] mx-auto leading-relaxed">
+                <div className="flex flex-col items-center mb-20">
+                    <h2 className="text-3xl md:text-5xl font-bold mb-5 text-[#111827] font-['Outfit'] tracking-tight text-center">A Plataforma Completa</h2>
+                    <p className="text-xl text-[#4B5563] max-w-[600px] leading-relaxed text-center">
                         Tudo o que você precisa para gerenciar do plantio à venda, num único lugar.
                     </p>
                 </div>
+                <br />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-center">
                     {modules.map((mod, index) => (

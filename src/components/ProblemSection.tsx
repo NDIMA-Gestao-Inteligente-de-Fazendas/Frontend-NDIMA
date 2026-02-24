@@ -25,8 +25,8 @@ export default function ProblemSection() {
     return (
         <section className="py-24 bg-white" id="problemas">
             <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-5 text-[#111827] font-['Outfit'] tracking-tight">
+                <div className="flex flex-col items-center mb-16">
+                    <h2 className="text-3xl md:text-5xl font-bold mb-5 text-[#111827] font-['Outfit'] tracking-tight text-center">
                         Por que muitos agricultores{' '}
                         <span
                             className="relative inline-block"
@@ -39,10 +39,11 @@ export default function ProblemSection() {
                             />
                         </span>
                     </h2>
-                    <p className="text-xl text-[#4B5563] max-w-[600px] mx-auto leading-relaxed">
+                    <p className="text-xl text-[#4B5563] max-w-[600px] leading-relaxed text-center">
                         Identificamos os 3 maiores desafios que impedem os agricultores de lucrar mais.
                     </p>
                 </div>
+                <br />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {problems.map((problem, index) => (

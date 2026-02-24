@@ -1,81 +1,141 @@
 import { Satellite, CloudLightning, WifiOff } from 'lucide-react';
 
+const features = [
+    {
+        icon: <Satellite size={22} />,
+        title: 'Imagens de Satélite (NDVI)',
+        description: 'Monitore o vigor das plantas sem sair de casa.',
+    },
+    {
+        icon: <CloudLightning size={22} />,
+        title: 'Previsão Hiper-local',
+        description: 'Dados meteorológicos precisos para as coordenadas exatas da sua fazenda.',
+    },
+    {
+        icon: <WifiOff size={22} />,
+        title: 'Offline First',
+        description: 'Funciona no campo, mesmo sem internet. Sincroniza quando você volta à cidade.',
+    },
+];
+
 export default function TechnologySection() {
     return (
         <section className="py-24 bg-white overflow-hidden" id="tecnologia">
             <style>{`
                 @keyframes float-sat {
-                    0% { transform: translate(-50%, 0px) rotate(-5deg); }
-                    50% { transform: translate(-50%, -20px) rotate(5deg); }
-                    100% { transform: translate(-50%, 0px) rotate(-5deg); }
+                    0%   { transform: translateY(0px) rotate(-4deg); }
+                    50%  { transform: translateY(-18px) rotate(4deg); }
+                    100% { transform: translateY(0px) rotate(-4deg); }
                 }
                 @keyframes pulse-beam {
-                    0% { opacity: 0.3; }
-                    100% { opacity: 0.7; }
+                    0%   { opacity: 0.25; transform: scaleX(1); }
+                    100% { opacity: 0.55; transform: scaleX(1.05); }
                 }
                 @keyframes twinkle-point {
-                    0%, 100% { opacity: 0.2; transform: scale(0.8); }
-                    50% { opacity: 1; transform: scale(1.2); }
+                    0%, 100% { opacity: 0.2; transform: scale(0.7); }
+                    50%      { opacity: 1;   transform: scale(1.3); }
                 }
-                .animate-float-sat { animation: float-sat 6s ease-in-out infinite; }
-                .animate-pulse-beam { animation: pulse-beam 4s infinite alternate; }
             `}</style>
 
-            <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                <div className="flex flex-col">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-5 text-[#111827] font-['Outfit'] tracking-tight">
-                        Tecnologia Espacial no seu <span className="text-[#1A4D2E] relative inline-block after:content-[''] after:absolute after:bottom-1 after:left-0 after:w-full after:h-2 after:bg-[#F7C04A] after:-z-10 after:opacity-50 after:rounded">Bolso.</span>
-                    </h2>
-                    <p className="text-xl text-[#4B5563] ml-0 leading-relaxed mb-10">
-                        Utilizamos o que há de mais avançado em ciência de dados para que você foque no que importa: cultivar e lucrar.
-                    </p>
+            <div className="container mx-auto px-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
 
-                    <div className="flex flex-col gap-8">
-                        <div className="flex items-start gap-6">
-                            <div className="w-12 h-12 min-w-[3rem] rounded-xl bg-[#1A4D2E]/10 text-[#1A4D2E] flex items-center justify-center">
-                                <Satellite size={24} />
-                            </div>
-                            <div>
-                                <h4 className="text-xl font-bold mb-2 text-[#111827] font-['Outfit']">Imagens de Satélite (NDVI)</h4>
-                                <p className="text-[#4B5563] leading-relaxed">Monitore o vigor das plantas sem sair de casa.</p>
-                            </div>
-                        </div>
+                    {/* ── Left column ── */}
+                    <div className="flex flex-col">
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-[#111827] font-['Outfit'] tracking-tight leading-tight">
+                            Tecnologia Espacial <br />
+                            no seu{' '}
+                            <span className="relative inline-block" style={{ color: '#1A4D2E' }}>
+                                Bolso.
+                                <span
+                                    className="absolute bottom-1 left-0 w-full h-2 rounded opacity-50"
+                                    style={{ backgroundColor: '#F7C04A', zIndex: -1 }}
+                                />
+                            </span>
+                        </h2>
 
-                        <div className="flex items-start gap-6">
-                            <div className="w-12 h-12 min-w-[3rem] rounded-xl bg-[#1A4D2E]/10 text-[#1A4D2E] flex items-center justify-center">
-                                <CloudLightning size={24} />
-                            </div>
-                            <div>
-                                <h4 className="text-xl font-bold mb-2 text-[#111827] font-['Outfit']">Previsão Hiper-local</h4>
-                                <p className="text-[#4B5563] leading-relaxed">Dados meteorológicos precisos para as coordenadas da sua fazenda.</p>
-                            </div>
-                        </div>
+                        <p className="text-lg text-[#4B5563] leading-relaxed mb-12 max-w-lg">
+                            Utilizamos o que há de mais avançado em ciência de dados para que você foque no que importa: cultivar e lucrar.
+                        </p>
 
-                        <div className="flex items-start gap-6">
-                            <div className="w-12 h-12 min-w-[3rem] rounded-xl bg-[#1A4D2E]/10 text-[#1A4D2E] flex items-center justify-center">
-                                <WifiOff size={24} />
-                            </div>
-                            <div>
-                                <h4 className="text-xl font-bold mb-2 text-[#111827] font-['Outfit']">Offline First</h4>
-                                <p className="text-[#4B5563] leading-relaxed">Funciona no campo, mesmo sem internet. Sincroniza quando você volta à cidade.</p>
-                            </div>
+                        <div className="flex flex-col gap-7">
+                            {features.map((f, i) => (
+                                <div key={i} className="flex items-start gap-5">
+                                    <div
+                                        className="w-11 h-11 min-w-[2.75rem] rounded-xl flex items-center justify-center"
+                                        style={{ backgroundColor: 'rgba(26,77,46,0.08)', color: '#1A4D2E' }}
+                                    >
+                                        {f.icon}
+                                    </div>
+                                    <div>
+                                        <h4 className="text-base font-bold mb-1 text-[#111827] font-['Outfit']">
+                                            {f.title}
+                                        </h4>
+                                        <p className="text-[#4B5563] leading-relaxed text-sm">
+                                            {f.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                </div>
 
-                <div className="relative h-[350px] md:h-[500px] flex justify-center items-center">
-                    <div className="relative w-full h-full bg-[radial-gradient(circle_at_center,rgba(26,77,46,0.05)_0%,transparent_70%)]">
-                        <div className="absolute bottom-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#2A6A42] rounded-[50%] opacity-5"></div>
+                    {/* ── Right column — visual ── */}
+                    <div className="relative h-[420px] flex justify-center items-center">
+                        {/* Subtle radial glow */}
+                        <div
+                            className="absolute inset-0 rounded-3xl"
+                            style={{ background: 'radial-gradient(circle at 50% 60%, rgba(26,77,46,0.06) 0%, transparent 70%)' }}
+                        />
 
-                        <div className="absolute top-[35%] left-1/2 -translate-x-1/2 w-[100px] h-[300px] bg-gradient-to-b from-[#F7C04A]/30 to-transparent [clip-path:polygon(40%_0,60%_0,100%_100%,0_100%)] animate-pulse-beam"></div>
+                        {/* Earth arc */}
+                        <div
+                            className="absolute bottom-[-120px] left-1/2 -translate-x-1/2 w-[520px] h-[260px] rounded-[50%] opacity-10"
+                            style={{ backgroundColor: '#2A6A42' }}
+                        />
 
-                        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 animate-float-sat">
-                            <Satellite size={80} color="#1A4D2E" />
+                        {/* Beam */}
+                        <div
+                            className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[90px] h-[220px]"
+                            style={{
+                                background: 'linear-gradient(to bottom, rgba(247,192,74,0.4), transparent)',
+                                clipPath: 'polygon(35% 0, 65% 0, 100% 100%, 0% 100%)',
+                                animation: 'pulse-beam 3.5s infinite alternate',
+                            }}
+                        />
+
+                        {/* Satellite icon + label */}
+                        <div
+                            className="absolute top-[18%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                            style={{ animation: 'float-sat 6s ease-in-out infinite' }}
+                        >
+                            <Satellite size={90} color="#1A4D2E" strokeWidth={1.5} />
+                            <span
+                                className="text-[11px] font-bold tracking-widest uppercase px-3 py-1 rounded-full"
+                                style={{ backgroundColor: 'rgba(26,77,46,0.1)', color: '#1A4D2E' }}
+                            >
+                                AngoSat-2
+                            </span>
                         </div>
 
-                        <div className="absolute bottom-[25%] left-[30%] w-3 h-3 rounded-full bg-[#F7C04A] shadow-[0_0_15px_#F7C04A]" style={{ animation: 'twinkle-point 2s infinite' }}></div>
-                        <div className="absolute bottom-[25%] left-[50%] w-3 h-3 rounded-full bg-[#F7C04A] shadow-[0_0_15px_#F7C04A]" style={{ animation: 'twinkle-point 3s infinite 1s' }}></div>
-                        <div className="absolute bottom-[25%] left-[70%] w-3 h-3 rounded-full bg-[#F7C04A] shadow-[0_0_15px_#F7C04A]" style={{ animation: 'twinkle-point 2.5s infinite 0.5s' }}></div>
+                        {/* Ground signal dots */}
+                        {[
+                            { left: '28%', delay: '0s', dur: '2.2s' },
+                            { left: '50%', delay: '0.8s', dur: '2.8s' },
+                            { left: '72%', delay: '0.4s', dur: '2.4s' },
+                        ].map((dot, i) => (
+                            <div
+                                key={i}
+                                className="absolute w-3 h-3 rounded-full"
+                                style={{
+                                    bottom: '28%',
+                                    left: dot.left,
+                                    backgroundColor: '#F7C04A',
+                                    boxShadow: '0 0 14px #F7C04A',
+                                    animation: `twinkle-point ${dot.dur} infinite ${dot.delay}`,
+                                }}
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
