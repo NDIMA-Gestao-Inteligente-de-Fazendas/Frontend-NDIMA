@@ -30,7 +30,7 @@ export default function Header() {
                     border: isScrolled ? '1px solid rgba(255,255,255,0.15)' : 'none',
                 }}
             >
-                <div className="container mx-auto px-6 py-5 flex items-center justify-between"
+                <div className="container mx-auto px-7 py-6 flex items-center justify-between"
                     style={{ maxWidth: '100%', minHeight: '72px' }}
                 >
                     <div className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export default function Header() {
                             src="img/logotipofinal-04.png"
                             alt="NDIMA Logo"
                             className="w-auto object-contain transition-all duration-500"
-                            style={{ height: isScrolled ? '36px' : '44px' }}
+                            style={{ height: isScrolled ? '44px' : '56px' }}
                         />
                     </div>
 

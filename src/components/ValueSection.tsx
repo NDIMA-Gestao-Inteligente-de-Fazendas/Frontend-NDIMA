@@ -8,23 +8,54 @@ const values = [
 
 export default function ValueSection() {
     return (
-        <section className="py-8 pb-32 bg-white">
+        <section className="py-24 bg-white">
             <div className="container mx-auto px-6">
-                <div className="bg-gradient-to-br from-[#1A4D2E] to-[#123520] rounded-[2rem] p-8 md:p-16 shadow-[0_20px_40px_-10px_rgba(26,77,46,0.4)] relative overflow-hidden">
-                    <div className="absolute -top-[50%] -left-[10%] w-[50%] h-[200%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)] rotate-[30deg]"></div>
+                <div
+                    className="relative rounded-[2rem] p-10 md:p-20 overflow-hidden"
+                    style={{
+                        background: 'linear-gradient(135deg, #1A4D2E 0%, #123520 100%)',
+                        boxShadow: '0 20px 40px -10px rgba(26,77,46,0.4)',
+                    }}
+                >
+                    {/* Decorative glow */}
+                    <div
+                        className="absolute -top-1/2 -left-[10%] w-1/2 h-[200%] pointer-events-none"
+                        style={{
+                            background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, transparent 70%)',
+                            transform: 'rotate(30deg)',
+                        }}
+                    />
 
+                    {/* Heading */}
                     <h2
-                        className="text-3xl md:text-5xl font-bold text-center mb-12 font-['Outfit'] tracking-tight relative z-10"
+                        className="relative z-10 text-3xl md:text-5xl font-bold text-center mb-16 font-['Outfit'] tracking-tight"
                         style={{ color: 'white' }}
                     >
                         Muito além de um software de gestão.
                     </h2>
-
-                    <ul className="flex flex-col gap-6 max-w-[600px] mx-auto relative z-10">
+                    <br />
+                    {/* Value list — wider and centred */}
+                    <ul className="relative  z-10 flex flex-col gap-5 max-w-[760px] mx-auto">
                         {values.map((v, i) => (
-                            <li key={i} className="flex items-center gap-5 bg-white/10 p-5 md:p-6 rounded-xl backdrop-blur-md border border-white/10 transition-transform duration-300 hover:scale-[1.02] hover:bg-white/15">
-                                <CheckCircle2 size={28} className="text-[#F7C04A] min-w-[28px]" />
-                                <span className="text-white text-lg md:text-xl font-medium">{v}</span>
+                            <li
+                                key={i}
+                                className="flex items-center gap-5 rounded-xl p-5 md:p-6 transition-transform duration-300 hover:scale-[1.02]"
+                                style={{
+                                    backgroundColor: 'rgba(255,255,255,0.08)',
+                                    border: '1px solid rgba(255,255,255,0.12)',
+                                    backdropFilter: 'blur(8px)',
+                                }}
+                            >
+                                <CheckCircle2
+                                    size={28}
+                                    style={{ color: '#F7C04A', minWidth: '28px' }}
+                                />
+                                <span
+                                    className="text-lg md:text-xl font-medium"
+                                    style={{ color: 'white' }}
+                                >
+                                    {v}
+                                </span>
                             </li>
                         ))}
                     </ul>
