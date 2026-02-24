@@ -47,7 +47,6 @@ export default function Header() {
                         <a href="#inicio" className="font-medium transition-colors hover:text-yellow-300" style={{ color: 'white' }}>Início</a>
                         <a href="#funcionalidades" className="font-medium transition-colors hover:text-yellow-300" style={{ color: 'white' }}>Funcionalidades</a>
                         <a href="#tecnologia" className="font-medium transition-colors hover:text-yellow-300" style={{ color: 'white' }}>Tecnologia</a>
-                        <a href="#precos" className="font-medium transition-colors hover:text-yellow-300" style={{ color: 'white' }}>Preços</a>
                     </nav>
 
                     {/* Desktop Actions */}
