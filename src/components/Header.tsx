@@ -84,7 +84,6 @@ export default function Header() {
                         <a href="#inicio" className="text-center text-base font-medium text-white hover:text-yellow-300 transition-colors" onClick={() => setIsMenuOpen(false)}>Início</a>
                         <a href="#funcionalidades" className="text-center text-base font-medium text-white hover:text-yellow-300 transition-colors" onClick={() => setIsMenuOpen(false)}>Funcionalidades</a>
                         <a href="#tecnologia" className="text-center text-base font-medium text-white hover:text-yellow-300 transition-colors" onClick={() => setIsMenuOpen(false)}>Tecnologia</a>
-                        <a href="#precos" className="text-center text-base font-medium text-white hover:text-yellow-300 transition-colors" onClick={() => setIsMenuOpen(false)}>Preços</a>
 
                         <div className="flex flex-col gap-3 mt-2">
                             <button
