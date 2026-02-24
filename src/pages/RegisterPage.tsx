@@ -26,8 +26,8 @@ export default function RegisterPage() {
             setError('As senhas não coincidem.');
             return;
         }
-        // TODO: integrate with auth API
-        navigate('/');
+        // TODO: integrate with auth API — then redirect to OTP verification
+        navigate('/verificar', { state: { telefone: form.telefone } });
     };
 
     const inputClass =

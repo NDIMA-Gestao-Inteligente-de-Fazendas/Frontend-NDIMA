@@ -10,6 +10,7 @@ import CTASection from './components/CTASection';
 import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import OtpPage from './pages/OtpPage';
 
 function LandingPage() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegisterPage />} />
+        <Route path="/verificar" element={<OtpPage />} />
       </Routes>
     </BrowserRouter>
   );
