@@ -1,4 +1,4 @@
-import { ArrowRight, Play, CheckCircle } from 'lucide-react';
+import { ArrowRight, Play } from 'lucide-react';
 
 export default function HeroSection() {
     return (
