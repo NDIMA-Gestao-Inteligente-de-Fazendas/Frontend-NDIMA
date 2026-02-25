@@ -64,6 +64,23 @@ export async function loginUser(payload: LoginPayload): Promise<LoginResponse> {
     return data;
 }
 
+// ── Auth/Me ──────────────────────────────────────────────────────────────────
+
+export interface UserProfile {
+    id: string; firstName: string; lastName: string; phone: string;
+    onboardingStep: number; onboardingCompleted: boolean;
+    farm?: {
+        name: string; province: string; cultivableArea: number;
+        location?: { lat: number; lon: number };
+        soilQuality?: { qualityScore: number; qualityLabel: string };
+    };
+    products?: string[]; objectives?: string[];
+}
+
+export async function getMe() {
+    return apiGet<UserProfile>('/auth/me');
+}
+
 // ── Onboarding ────────────────────────────────────────────────────────────────
 
 export interface OnboardingStatus {
@@ -89,4 +106,45 @@ export async function submitPhase3(objectives: string[]) {
     return apiPost<{ message: string; onboardingStep: number; onboardingCompleted: boolean }>(
         '/onboarding/phase-3', { objectives }, true
     );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+    operacoesHoje: number;
+    tarefasPendentes: { total: number; emAtraso: number };
+    saudeFazenda: { percentual: number; variacaoMensal: number };
+}
+
+export async function getDashboardStats() {
+    return apiGet<DashboardStats>('/dashboard/stats');
+}
+
+export interface FarmHealthHistory {
+    period: string;
+    data: { month: string; value: number }[];
+}
+
+export async function getFarmHealthHistory() {
+    return apiGet<FarmHealthHistory>('/dashboard/farm-health-history');
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+export interface Notification {
+    _id: string;
+    type: 'SYSTEM' | 'STOCK_ALERT' | 'WATER_ALERT' | 'TASK_OVERDUE' | 'AGRO_TIP';
+    title: string;
+    description: string;
+    severity: 'info' | 'warning' | 'error' | 'success';
+    read: boolean;
+    createdAt: string;
+}
+
+export async function getNotifications() {
+    return apiGet<Notification[]>('/notifications');
+}
+
+export async function getUnreadCount() {
+    return apiGet<{ unread: number }>('/notifications/unread-count');
 }

@@ -4,25 +4,47 @@ import {
     TrendingUp, AlertTriangle, Droplets, Leaf, ChevronRight
 } from 'lucide-react';
 import WeatherCard from '../components/WeatherCard';
-import { getOnboardingStatus } from '../services/authService';
+import {
+    getMe, getDashboardStats, getFarmHealthHistory, getNotifications, getUnreadCount,
+    type UserProfile, type DashboardStats, type FarmHealthHistory, type Notification,
+} from '../services/authService';
 
-/* ─────────── Static data ─────────── */
-const NOTIFICATIONS = [
-    { icon: AlertTriangle, color: '#F59E0B', bg: '#FFFBEB', label: 'Alerta de stocks', desc: 'Fertilizante abaixo do mínimo' },
-    { icon: Droplets, color: '#3B82F6', bg: '#EFF6FF', label: 'Alerta hídrico', desc: 'Humidade baixa no Bloco 2' },
-    { icon: CalendarCheck, color: '#EF4444', bg: '#FEF2F2', label: 'Tarefa em atraso', desc: 'Irrigação do Bloco 3' },
-    { icon: Leaf, color: '#10B981', bg: '#ECFDF5', label: 'Dica agronómica', desc: 'Boa semana para plantar milho' },
-];
+/* ─────────── Notification icon/color map ─────────── */
+const NOTIF_STYLE: Record<string, { icon: any; color: string; bg: string }> = {
+    STOCK_ALERT: { icon: AlertTriangle, color: '#F59E0B', bg: '#FFFBEB' },
+    WATER_ALERT: { icon: Droplets, color: '#3B82F6', bg: '#EFF6FF' },
+    TASK_OVERDUE: { icon: CalendarCheck, color: '#EF4444', bg: '#FEF2F2' },
+    AGRO_TIP: { icon: Leaf, color: '#10B981', bg: '#ECFDF5' },
+    SYSTEM: { icon: Bell, color: '#1A4D2E', bg: '#ECFDF5' },
+};
 
-const STATS = [
-    { icon: Leaf, label: 'Área Cultivada', key: 'area', color: '#1A4D2E' },
-    { icon: Tractor, label: 'Operações Hoje', value: '3', color: '#F59E0B', sub: 'agendadas' },
-    { icon: CalendarCheck, label: 'Tarefas Pendentes', value: '5', color: '#EF4444', sub: '2 em atraso' },
-    { icon: TrendingUp, label: 'Saúde da Fazenda', value: '78%', color: '#3B82F6', sub: '↑ +4% este mês' },
-];
+/* ─────────── SVG sparkline helper ─────────── */
+function buildSparklinePath(data: { month: string; value: number }[]): {
+    path: string; points: [number, number][];
+} {
+    if (!data.length) return { path: '', points: [] };
+    const W = 840, H = 80, padding = 8;
+    const vals = data.map(d => d.value);
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const range = max - min || 1;
+
+    const coords: [number, number][] = data.map((d, i) => [
+        Math.round((i / Math.max(data.length - 1, 1)) * W),
+        Math.round(H - padding - ((d.value - min) / range) * (H - padding * 2)),
+    ]);
+
+    const path = coords
+        .map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`))
+        .join(' ');
+
+    return { path, points: coords };
+}
 
 /* ─────────── Sub-components ─────────── */
-function StatCard({ icon: Icon, label, value, sub, color }: { icon: any; label: string; value: string; sub: string; color: string }) {
+function StatCard({ icon: Icon, label, value, sub, color }: {
+    icon: any; label: string; value: string; sub: string; color: string;
+}) {
     return (
         <div className="bg-white rounded-2xl p-5 border border-[#E9EEE9] shadow-sm flex flex-col justify-between min-h-[140px]">
             <div className="flex items-center justify-between">
@@ -39,7 +61,9 @@ function StatCard({ icon: Icon, label, value, sub, color }: { icon: any; label: 
     );
 }
 
-function NotifCard({ icon: Icon, color, bg, label, desc }: { icon: any; color: string; bg: string; label: string; desc: string }) {
+function NotifCard({ icon: Icon, color, bg, label, desc }: {
+    icon: any; color: string; bg: string; label: string; desc: string;
+}) {
     return (
         <div className="flex items-start gap-3 p-4 rounded-2xl border border-transparent transition-all hover:border-[#E9EEE9] hover:shadow-sm"
             style={{ background: bg }}>
@@ -54,11 +78,12 @@ function NotifCard({ icon: Icon, color, bg, label, desc }: { icon: any; color: s
     );
 }
 
-function QuickAction({ icon: Icon, label, desc, color }: { icon: any; label: string; desc: string; color: string }) {
+function QuickAction({ icon: Icon, label, desc, color }: {
+    icon: any; label: string; desc: string; color: string;
+}) {
     return (
         <button className="group flex items-center gap-4 w-full px-5 py-4 bg-white border border-[#E9EEE9] rounded-2xl
-            hover:border-transparent hover:shadow-md transition-all text-left"
-            style={{ ['--hover-border' as any]: color }}>
+            hover:border-transparent hover:shadow-md transition-all text-left">
             <span className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
                 style={{ background: `${color}15` }}>
                 <Icon size={18} style={{ color }} />
@@ -78,23 +103,58 @@ export default function DashboardHomePage() {
     const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
     const dateLabel = new Date().toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
 
-    const [farm, setFarm] = useState<{ name?: string; province?: string; cultivableArea?: number }>({});
+    const [user, setUser] = useState<UserProfile | null>(null);
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [history, setHistory] = useState<FarmHealthHistory | null>(null);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
-        getOnboardingStatus().then(s => { if (s.farm) setFarm(s.farm); }).catch(() => { });
+        getMe().then(setUser).catch(() => { });
+        getDashboardStats().then(setStats).catch(() => { });
+        getFarmHealthHistory().then(setHistory).catch(() => { });
+        getNotifications().then(setNotifications).catch(() => { });
+        getUnreadCount().then(r => setUnreadCount(r.unread)).catch(() => { });
     }, []);
 
-    const statsValues = [
-        farm.cultivableArea ? `${farm.cultivableArea} ha` : '—',
-        '3', '5', '78%',
-    ];
-    const statsSubs = [
-        farm.province ?? 'Angola',
-        'agendadas', '2 em atraso', '↑ +4% este mês',
+    /* Build stat cards from real data */
+    const STATS = [
+        {
+            icon: Leaf, label: 'Área Cultivada', color: '#1A4D2E',
+            value: user?.farm?.cultivableArea ? `${user.farm.cultivableArea} ha` : '—',
+            sub: user?.farm?.province ?? 'Angola',
+        },
+        {
+            icon: Tractor, label: 'Operações Hoje', color: '#F59E0B',
+            value: stats ? String(stats.operacoesHoje) : '—',
+            sub: 'agendadas',
+        },
+        {
+            icon: CalendarCheck, label: 'Tarefas Pendentes', color: '#EF4444',
+            value: stats ? String(stats.tarefasPendentes.total) : '—',
+            sub: stats ? `${stats.tarefasPendentes.emAtraso} em atraso` : '—',
+        },
+        {
+            icon: TrendingUp, label: 'Saúde da Fazenda', color: '#3B82F6',
+            value: stats ? `${stats.saudeFazenda.percentual}%` : '—',
+            sub: stats
+                ? (stats.saudeFazenda.variacaoMensal >= 0
+                    ? `↑ +${stats.saudeFazenda.variacaoMensal}% este mês`
+                    : `↓ ${stats.saudeFazenda.variacaoMensal}% este mês`)
+                : '—',
+        },
     ];
 
-    /* SVG sparkline path */
-    const path = 'M0,72 C80,62 140,45 220,40 C300,35 350,50 430,32 C510,16 570,38 650,24 C720,14 780,30 840,18';
+    /* Build sparkline from real history */
+    const sparkData = history?.data ?? [];
+    const { path: sparkPath, points: sparkPoints } = buildSparklinePath(sparkData);
+    const sparkMonths = sparkData.map(d => d.month);
+
+    /* Health variation label for chart header */
+    const healthVariation = stats?.saudeFazenda.variacaoMensal ?? 0;
+    const healthLabel = healthVariation >= 0
+        ? `Este mês ↑ +${healthVariation}%`
+        : `Este mês ↓ ${healthVariation}%`;
 
     return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto pb-8 font-['Inter']">
@@ -102,19 +162,19 @@ export default function DashboardHomePage() {
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-[#111827] font-['Outfit'] leading-tight">
-                        {greeting} 👋
+                        {greeting}{user ? `, ${user.firstName}` : ''} 👋
                     </h1>
                     <p className="text-sm text-[#9CA3AF] mt-1 capitalize">
-                        {farm.name
-                            ? <><span className="text-[#1A4D2E] font-semibold">{farm.name}</span> · </>
+                        {user?.farm?.name
+                            ? <><span className="text-[#1A4D2E] font-semibold">{user.farm.name}</span> · </>
                             : null}
                         {dateLabel}
                     </p>
                 </div>
                 <div className="flex items-center gap-3 bg-white border border-[#E9EEE9] rounded-2xl px-5 py-3 shadow-sm select-none">
                     <Bell size={18} className="text-[#1A4D2E]" />
-                    <span className="text-sm font-semibold text-[#111827]">{NOTIFICATIONS.length} alertas</span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] animate-pulse" />
+                    <span className="text-sm font-semibold text-[#111827]">{unreadCount} alertas</span>
+                    {unreadCount > 0 && <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] animate-pulse" />}
                 </div>
             </header>
 
@@ -122,20 +182,13 @@ export default function DashboardHomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Weather */}
                 <div className="lg:col-span-5 h-[340px]">
-                    <WeatherCard province={farm.province} />
+                    <WeatherCard province={user?.farm?.province} />
                 </div>
 
                 {/* Stats 2×2 */}
                 <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {STATS.map((s, i) => (
-                        <StatCard
-                            key={s.label}
-                            icon={s.icon}
-                            label={s.label}
-                            value={statsValues[i]}
-                            sub={statsSubs[i]}
-                            color={s.color}
-                        />
+                    {STATS.map(s => (
+                        <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} sub={s.sub} color={s.color} />
                     ))}
                 </div>
             </div>
@@ -150,11 +203,28 @@ export default function DashboardHomePage() {
                             <h2 className="font-bold text-[#111827] font-['Outfit'] text-lg">Notificações</h2>
                         </div>
                         <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white"
-                            style={{ background: '#1A4D2E' }}>{NOTIFICATIONS.length}</span>
+                            style={{ background: '#1A4D2E' }}>{notifications.length}</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {NOTIFICATIONS.map(n => <NotifCard key={n.label} {...n} />)}
-                    </div>
+
+                    {notifications.length === 0 ? (
+                        <p className="text-sm text-[#9CA3AF] text-center py-6">Sem notificações de momento.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {notifications.map(n => {
+                                const style = NOTIF_STYLE[n.type] ?? NOTIF_STYLE.SYSTEM;
+                                return (
+                                    <NotifCard
+                                        key={n._id}
+                                        icon={style.icon}
+                                        color={style.color}
+                                        bg={style.bg}
+                                        label={n.title}
+                                        desc={n.description}
+                                    />
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* Quick actions */}
@@ -177,32 +247,39 @@ export default function DashboardHomePage() {
                         <TrendingUp size={18} className="text-[#1A4D2E]" />
                         <h2 className="font-bold text-[#111827] font-['Outfit'] text-lg">Saúde da Fazenda</h2>
                     </div>
-                    <span className="text-sm font-semibold px-3 py-1.5 rounded-full"
-                        style={{ background: 'rgba(26,77,46,0.09)', color: '#1A4D2E' }}>
-                        Este mês ↑ +12%
-                    </span>
+                    {stats && (
+                        <span className="text-sm font-semibold px-3 py-1.5 rounded-full"
+                            style={{ background: 'rgba(26,77,46,0.09)', color: '#1A4D2E' }}>
+                            {healthLabel}
+                        </span>
+                    )}
                 </div>
-                <div className="w-full overflow-x-auto overflow-y-hidden">
-                    <div style={{ minWidth: '700px' }}>
-                        <svg viewBox="0 0 840 80" className="w-full" style={{ height: 80, display: 'block' }}>
-                            <defs>
-                                <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#1A4D2E" stopOpacity=".14" />
-                                    <stop offset="100%" stopColor="#1A4D2E" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                            {[20, 50].map(y => <line key={y} x1="0" y1={y} x2="840" y2={y} stroke="#F3F4F6" strokeWidth="1" />)}
-                            <path d={path} fill="none" stroke="#1A4D2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d={`${path} L840,80 L0,80 Z`} fill="url(#cg)" />
-                            {([[220, 40], [430, 32], [650, 24], [840, 18]] as [number, number][]).map(([x, y], i) => (
-                                <circle key={i} cx={x} cy={y} r="4" fill="white" stroke="#1A4D2E" strokeWidth="2" />
-                            ))}
-                        </svg>
-                        <div className="flex justify-between text-xs text-[#9CA3AF] mt-2 px-1">
-                            {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'].map(m => <span key={m}>{m}</span>)}
+
+                {sparkData.length > 0 ? (
+                    <div className="w-full overflow-x-auto overflow-y-hidden">
+                        <div style={{ minWidth: '700px' }}>
+                            <svg viewBox="0 0 840 80" className="w-full" style={{ height: 80, display: 'block' }}>
+                                <defs>
+                                    <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#1A4D2E" stopOpacity=".14" />
+                                        <stop offset="100%" stopColor="#1A4D2E" stopOpacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                {[20, 50].map(y => <line key={y} x1="0" y1={y} x2="840" y2={y} stroke="#F3F4F6" strokeWidth="1" />)}
+                                <path d={sparkPath} fill="none" stroke="#1A4D2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d={`${sparkPath} L840,80 L0,80 Z`} fill="url(#cg)" />
+                                {sparkPoints.map(([x, y], i) => (
+                                    <circle key={i} cx={x} cy={y} r="4" fill="white" stroke="#1A4D2E" strokeWidth="2" />
+                                ))}
+                            </svg>
+                            <div className="flex justify-between text-xs text-[#9CA3AF] mt-2 px-1">
+                                {sparkMonths.map(m => <span key={m}>{m}</span>)}
+                            </div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <p className="text-sm text-[#9CA3AF] text-center py-6">Sem dados históricos disponíveis.</p>
+                )}
             </div>
         </div>
     );
