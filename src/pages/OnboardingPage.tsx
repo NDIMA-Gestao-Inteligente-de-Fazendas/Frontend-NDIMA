@@ -55,7 +55,7 @@ export default function OnboardingPage() {
                 setForm(prev => ({ ...prev, location: `${pos.coords.latitude}, ${pos.coords.longitude}` }));
                 setLocating(false);
             },
-            (err) => {
+            (_err) => {
                 setError('Não foi possível obter a localização. Insira manualmente.');
                 setLocating(false);
             }

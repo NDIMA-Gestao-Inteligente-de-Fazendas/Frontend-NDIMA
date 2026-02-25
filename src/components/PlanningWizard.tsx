@@ -273,7 +273,7 @@ function Step4({ plan }: { plan: PlanRecord }) {
 }
 
 /* ─── Step 5: Timeline Result ────────────────────────────────── */
-function Step5({ plan, onClose }: { plan: PlanRecord; onClose: () => void }) {
+function Step5({ plan }: { plan: PlanRecord }) {
     const startDate = new Date(plan.startDate);
     const timeline = [
         { week: 1, icon: '🪛', color: '#F59E0B', phase: 'Preparação', label: 'Preparação do solo, compra e organização de insumos.', date: addWeeks(plan.startDate, 0) },
@@ -400,7 +400,7 @@ export default function PlanningWizard({ isOpen, onClose, defaultProvince = 'Ang
                         )}
                         {step === 3 && <Step3 onDone={() => setStep(4)} />}
                         {step === 4 && plan && <Step4 plan={plan} />}
-                        {step === 5 && plan && <Step5 plan={plan} onClose={onClose} />}
+                        {step === 5 && plan && <Step5 plan={plan} />}
                     </div>
 
                     {/* Footer nav */}
