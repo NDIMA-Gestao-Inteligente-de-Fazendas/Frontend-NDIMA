@@ -203,7 +203,7 @@ export default function PlanningPage() {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                    <div className="grid grid-cols-1 p-2 md:grid-cols-3 gap-6 items-stretch">
                         {/* pH Gauge */}
                         <div className="flex flex-col items-center justify-center gap-4 p-6 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
                             <span className="text-sm font-semibold text-[#6B7280]">pH do Solo</span>
