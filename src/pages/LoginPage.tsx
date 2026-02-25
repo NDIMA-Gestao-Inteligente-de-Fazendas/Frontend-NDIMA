@@ -1,21 +1,47 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Phone, Lock, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Phone, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { loginUser } from '../services/authService';
+
+const ONBOARDING_ROUTES: Record<number, string> = {
+    0: '/onboarding',
+    1: '/onboarding/produtos',
+    2: '/onboarding/objetivos',
+};
 
 export default function LoginPage() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [form, setForm] = useState({ telefone: '', senha: '' });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+        setError('');
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: integrate with auth API
-        navigate('/');
+        setLoading(true);
+        setError('');
+        try {
+            const { user } = await loginUser({
+                phone: `+244${form.telefone.replace(/\s/g, '')}`,
+                password: form.senha,
+            });
+            if (user.onboardingCompleted) {
+                navigate('/');
+            } else {
+                navigate(ONBOARDING_ROUTES[user.onboardingStep] ?? '/onboarding');
+            }
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Credenciais inválidas.');
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     return (
         <div className="min-h-screen flex font-['Inter']">
@@ -92,12 +118,18 @@ export default function LoginPage() {
                             </button>
                         </div>
 
+                        {error && <p className="text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>}
+
                         <button
                             type="submit"
-                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg mt-2"
+                            disabled={loading}
+                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
                             style={{ backgroundColor: '#F7C04A', color: '#123520' }}
                         >
-                            Entrar <ArrowRight size={18} />
+                            {loading
+                                ? <><Loader2 size={18} className="animate-spin" /> A entrar...</>
+                                : <>Entrar <ArrowRight size={18} /></>
+                            }
                         </button>
                     </form>
 

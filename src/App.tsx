@@ -11,6 +11,9 @@ import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import OtpPage from './pages/OtpPage';
+import OnboardingPage from './pages/OnboardingPage';
+import OnboardingProductsPage from './pages/OnboardingProductsPage';
+import OnboardingGoalsPage from './pages/OnboardingGoalsPage';
 
 function LandingPage() {
   return (
@@ -38,6 +41,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegisterPage />} />
         <Route path="/verificar" element={<OtpPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/onboarding/produtos" element={<OnboardingProductsPage />} />
+        <Route path="/onboarding/objetivos" element={<OnboardingGoalsPage />} />
       </Routes>
     </BrowserRouter>
   );
