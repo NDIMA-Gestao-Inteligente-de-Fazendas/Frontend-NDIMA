@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, MapPin } from 'lucide-react';
 import { submitPhase1 } from '../services/authService';
 
 const PROVINCES = [
@@ -35,22 +35,57 @@ function StepDot({ n, current }: { n: number; current: number }) {
 export default function OnboardingPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [locating, setLocating] = useState(false);
     const [error, setError] = useState('');
-    const [form, setForm] = useState({ farmName: '', province: '', cultivableArea: '' });
+    const [form, setForm] = useState({ farmName: '', province: '', cultivableArea: '', location: '' });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
         setError('');
     };
 
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            setError('A geolocalização não é suportada por este navegador.');
+            return;
+        }
+        setLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setForm(prev => ({ ...prev, location: `${pos.coords.latitude}, ${pos.coords.longitude}` }));
+                setLocating(false);
+            },
+            (err) => {
+                setError('Não foi possível obter a localização. Insira manualmente.');
+                setLocating(false);
+            }
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true); setError('');
+
+        // Parse coordinates
+        let parsedLocation;
+        const locStr = form.location.trim();
+        if (locStr) {
+            const parts = locStr.split(',').map(s => s.trim());
+            if (parts.length === 2) {
+                const lat = parseFloat(parts[0]);
+                const lon = parseFloat(parts[1]);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    parsedLocation = { lat, lon };
+                }
+            }
+        }
+
         try {
             await submitPhase1({
                 farmName: form.farmName,
                 province: form.province,
                 cultivableArea: parseFloat(form.cultivableArea),
+                ...(parsedLocation ? { location: parsedLocation } : {})
             });
             navigate('/onboarding/produtos');
         } catch (err: unknown) {
@@ -139,6 +174,25 @@ export default function OnboardingPage() {
                                 value={form.cultivableArea} onChange={handleChange} required className={inputClass}
                                 onFocus={e => e.currentTarget.style.borderColor = '#1A4D2E'}
                                 onBlur={e => e.currentTarget.style.borderColor = '#E5E7EB'} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-[#374151] mb-1.5 flex justify-between">
+                                <span>Localização (opcional)</span>
+                            </label>
+                            <div className="flex gap-2">
+                                <input name="location" type="text" placeholder="-8.925, 13.203"
+                                    value={form.location} onChange={handleChange} className={`${inputClass} flex-1`}
+                                    onFocus={e => e.currentTarget.style.borderColor = '#1A4D2E'}
+                                    onBlur={e => e.currentTarget.style.borderColor = '#E5E7EB'} />
+                                <button type="button" onClick={handleGetLocation} disabled={locating}
+                                    className="px-4 rounded-xl flex items-center justify-center border border-[#E5E7EB] bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
+                                    title="Obter localização atual">
+                                    {locating ? <Loader2 size={20} className="animate-spin text-[#1A4D2E]" /> : <MapPin size={20} className="text-[#1A4D2E]" />}
+                                </button>
+                            </div>
+                            <p className="text-xs text-[#9CA3AF] mt-1.5">
+                                Formato: latitude, longitude (ex: -8.925, 13.203)
+                            </p>
                         </div>
 
                         {error && <p className="text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>}

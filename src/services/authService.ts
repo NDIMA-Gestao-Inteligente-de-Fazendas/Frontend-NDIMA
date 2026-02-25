@@ -12,8 +12,18 @@ async function apiPost<T>(path: string, body: unknown, auth = false): Promise<T>
     });
     const data = await res.json();
     if (!res.ok) {
-        const msg = Array.isArray(data.message) ? data.message.join('\n') : data.message;
-        throw new Error(msg ?? 'Erro inesperado.');
+        let msg = Array.isArray(data.message) ? data.message.join(' | ') : data.message;
+
+        // Translate common NestJS class-validator English errors to Portuguese
+        if (typeof msg === 'string') {
+            msg = msg.replace(/property (.*) should not exist/g, 'O campo "$1" não é suportado pelo servidor atualmente');
+            msg = msg.replace(/(.*) must be a number/g, 'O campo "$1" deve ser numérico');
+            msg = msg.replace(/(.*) should not be empty/g, 'O campo "$1" não pode estar vazio');
+            msg = msg.replace(/(.*) must be an email/g, 'O campo "$1" tem de ser um email válido');
+            msg = msg.replace(/(.*) must be a string/g, 'O campo "$1" deve ser texto');
+        }
+
+        throw new Error(msg || 'Erro inesperado no servidor.');
     }
     return data as T;
 }
@@ -66,7 +76,7 @@ export async function getOnboardingStatus() {
     return apiGet<OnboardingStatus>('/onboarding/status');
 }
 
-export interface Phase1Payload { farmName: string; province: string; cultivableArea: number; }
+export interface Phase1Payload { farmName: string; province: string; cultivableArea: number; location?: { lat: number; lon: number }; }
 export async function submitPhase1(payload: Phase1Payload) {
     return apiPost<{ message: string; onboardingStep: number }>('/onboarding/phase-1', payload, true);
 }
