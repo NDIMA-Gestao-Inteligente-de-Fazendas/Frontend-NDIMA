@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Phone, Lock, User, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Phone, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
+import { registerUser } from '../services/authService';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [form, setForm] = useState({
@@ -20,14 +22,38 @@ export default function RegisterPage() {
         setError('');
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (form.senha !== form.confirmarSenha) {
             setError('As senhas não coincidem.');
             return;
         }
-        // TODO: integrate with auth API — then redirect to OTP verification
-        navigate('/verificar', { state: { telefone: form.telefone } });
+        const passwordValid =
+            form.senha.length > 6 &&
+            /[A-Z]/.test(form.senha) &&
+            /[a-z]/.test(form.senha) &&
+            /[^A-Za-z0-9]/.test(form.senha);
+        if (!passwordValid) {
+            setError('A senha não cumpre todos os requisitos.');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+        try {
+            const phone = `+244${form.telefone.replace(/\s/g, '')}`;
+            await registerUser({
+                firstName: form.primeiroNome,
+                lastName: form.ultimoNome,
+                phone,
+                password: form.senha,
+            });
+            navigate('/verificar', { state: { telefone: phone } });
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Erro ao criar conta. Tente novamente.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const inputClass =
@@ -134,23 +160,55 @@ export default function RegisterPage() {
                         </div>
 
                         {/* Senha */}
-                        <div className="relative">
-                            <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
-                            <input
-                                name="senha"
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder="Senha"
-                                value={form.senha}
-                                onChange={handleChange}
-                                required
-                                className={`${inputClass} pl-11 pr-12`}
-                                onFocus={e => e.currentTarget.style.borderColor = '#1A4D2E'}
-                                onBlur={e => e.currentTarget.style.borderColor = '#E5E7EB'}
-                            />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#374151]">
-                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
+                        <div>
+                            <div className="relative">
+                                <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
+                                <input
+                                    name="senha"
+                                    type={showPassword ? 'text' : 'password'}
+                                    placeholder="Senha"
+                                    value={form.senha}
+                                    onChange={handleChange}
+                                    required
+                                    className={`${inputClass} pl-11 pr-12`}
+                                    onFocus={e => e.currentTarget.style.borderColor = '#1A4D2E'}
+                                    onBlur={e => e.currentTarget.style.borderColor = '#E5E7EB'}
+                                />
+                                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#374151]">
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+
+                            {/* Real-time password rules — only shown when user has started typing */}
+                            {form.senha.length > 0 && (() => {
+                                const rules = [
+                                    { ok: form.senha.length > 6, label: 'Mais de 6 caracteres' },
+                                    { ok: /[A-Z]/.test(form.senha), label: 'Uma letra maiúscula' },
+                                    { ok: /[a-z]/.test(form.senha), label: 'Uma letra minúscula' },
+                                    { ok: /[^A-Za-z0-9]/.test(form.senha), label: 'Um caractere especial (!@#...)' },
+                                ];
+                                return (
+                                    <ul className="mt-2.5 flex flex-col gap-1.5 pl-1">
+                                        {rules.map((r, i) => (
+                                            <li key={i} className="flex items-center gap-2 text-xs transition-colors duration-200"
+                                                style={{ color: r.ok ? '#1A4D2E' : '#9CA3AF' }}>
+                                                <span
+                                                    className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200"
+                                                    style={{ backgroundColor: r.ok ? '#1A4D2E' : '#E5E7EB' }}
+                                                >
+                                                    {r.ok && (
+                                                        <svg width="8" height="7" viewBox="0 0 8 7" fill="none">
+                                                            <path d="M1 3.5L3 5.5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    )}
+                                                </span>
+                                                {r.label}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                );
+                            })()}
                         </div>
 
                         {/* Confirmar Senha */}
@@ -179,10 +237,14 @@ export default function RegisterPage() {
 
                         <button
                             type="submit"
-                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg mt-1"
+                            disabled={loading}
+                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
                             style={{ backgroundColor: '#F7C04A', color: '#123520' }}
                         >
-                            Criar Minha Conta <ArrowRight size={18} />
+                            {loading
+                                ? <><Loader2 size={18} className="animate-spin" /> A criar conta...</>
+                                : <>Criar Minha Conta <ArrowRight size={18} /></>
+                            }
                         </button>
                     </form>
 

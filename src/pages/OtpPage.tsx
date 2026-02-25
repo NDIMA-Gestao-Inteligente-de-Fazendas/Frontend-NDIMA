@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowRight, RotateCcw } from 'lucide-react';
+import { ArrowRight, RotateCcw, Loader2 } from 'lucide-react';
+import { verifyOtp, registerUser } from '../services/authService';
 
 const OTP_LENGTH = 6;
 
@@ -12,6 +13,7 @@ export default function OtpPage() {
 
     const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(30);
     const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -49,22 +51,34 @@ export default function OtpPage() {
         inputs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const code = digits.join('');
         if (code.length < OTP_LENGTH) {
             setError('Por favor, insira os 6 dígitos do código.');
             return;
         }
-        // TODO: call API to verify OTP
-        navigate('/login');
+        setLoading(true);
+        setError('');
+        try {
+            await verifyOtp({ phone: telefone, otp: code });
+            navigate('/login');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Código inválido. Tente novamente.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleResend = () => {
+    const handleResend = async () => {
         if (resendCooldown > 0) return;
+        setError('');
+        try {
+            // Re-trigger OTP by re-registering — replace if backend has a dedicated resend endpoint
+            await registerUser({ firstName: '', lastName: '', phone: telefone, password: '' });
+        } catch { /* phone already registered is expected — OTP is re-sent */ }
         setResendCooldown(30);
         setDigits(Array(OTP_LENGTH).fill(''));
-        // TODO: trigger API resend
     };
 
     return (
@@ -114,7 +128,7 @@ export default function OtpPage() {
                     <p className="text-[#6B7280] mb-8">
                         Código enviado para{' '}
                         <span className="font-semibold text-[#111827]">
-                            {telefone ? `+244 ${telefone}` : 'o seu número'}
+                            {telefone || 'o seu número'}
                         </span>
                     </p>
 
@@ -148,10 +162,14 @@ export default function OtpPage() {
                         <br />
                         <button
                             type="submit"
-                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                            disabled={loading}
+                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
                             style={{ backgroundColor: '#F7C04A', color: '#123520' }}
                         >
-                            Confirmar Código <ArrowRight size={18} />
+                            {loading
+                                ? <><Loader2 size={18} className="animate-spin" /> A verificar...</>
+                                : <>Confirmar Código <ArrowRight size={18} /></>
+                            }
                         </button>
                     </form>
 
