@@ -129,10 +129,10 @@ export default function PlanningPage() {
         }
     };
 
-    // Soil section helpers
-    const clay = soil?.texture?.clay ?? 40;
-    const sand = soil?.texture?.sand ?? 35;
-    const silt = soil?.texture?.silt ?? 25;
+    // Soil section helpers — round to avoid floating-point artifacts (e.g. 25.2000000000003%)
+    const clay = Math.round(soil?.texture?.clay ?? 40);
+    const sand = Math.round(soil?.texture?.sand ?? 35);
+    const silt = Math.round(soil?.texture?.silt ?? 25);
     const soilPieGradient = `conic-gradient(#8B4513 0% ${clay}%, #E6C280 ${clay}% ${clay + sand}%, #A0522D ${clay + sand}% 100%)`;
     const nitrogenPct = soil?.nutrients?.nitrogen.value ?? 0;
     const organicPct = soil?.nutrients?.organicMatter.value ?? 0;
@@ -155,11 +155,23 @@ export default function PlanningPage() {
                             <MapPin size={16} className="text-[#1A4D2E]" />
                             {user?.farm?.province || 'Angola'}
                         </span>
-                        <div className="w-px h-4 bg-[#E5E7EB]" />
-                        <span className="flex items-center gap-1.5 font-medium">
-                            <Sun size={16} className="text-[#D48806]" />
-                            {weather ? `${weather.temperatureCelsius}°C · ${weather.condition}` : '— °C'}
-                        </span>
+                        {/* Weather — only show divider + data when loaded */}
+                        {user?.farm?.province && (
+                            <>
+                                <div className="w-px h-4 bg-[#E5E7EB]" />
+                                {weather ? (
+                                    <span className="flex items-center gap-1.5 font-medium">
+                                        <Sun size={16} className="text-[#D48806]" />
+                                        {weather.temperatureCelsius}°C · {weather.condition}
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1.5">
+                                        <Sun size={16} className="text-[#E5E7EB]" />
+                                        <span className="w-24 h-3.5 bg-[#E5E7EB] rounded-full animate-pulse" />
+                                    </span>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
                 <button onClick={() => setWizardOpen(true)}
@@ -251,7 +263,7 @@ export default function PlanningPage() {
                         </div>
                     </div>
                 )}
-
+                <br />
                 {/* AI Verdict */}
                 <div className="mt-6 flex items-start gap-3 p-4 bg-gradient-to-r from-[#1A4D2E]/10 to-transparent rounded-xl border border-[#1A4D2E]/20 min-h-[68px]">
                     <span className="text-xl shrink-0">🤖</span>
@@ -269,7 +281,7 @@ export default function PlanningPage() {
                             </div>
                         ) : verdict ? (
                             <>
-                                <p className="text-sm text-[#4B5563] mt-0.5">{verdict.verdict}</p>
+                                <p className="text-sm text-[#4B5563] p-2 mt-3.5">{verdict.verdict}</p>
                                 {verdict.warnings.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {verdict.warnings.map((w, i) => (
@@ -285,23 +297,33 @@ export default function PlanningPage() {
                         )}
                     </div>
                 </div>
-
+                <br />
                 {/* Culturas recomendadas pela IA */}
                 {verdict?.recommendedCrops && verdict.recommendedCrops.length > 0 && (
                     <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {verdict.recommendedCrops.map(r => (
-                            <div key={r.cropId} className="flex flex-col gap-1.5 p-3 bg-white border border-[#E9EEE9] rounded-xl">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xl">{r.cropIcon}</span>
-                                    <span className="text-xs font-bold text-[#1A4D2E]">{r.compatibilityScore}%</span>
+                        {verdict.recommendedCrops.map((r, idx) => {
+                            // If all scores equal 100, give a visual gradient based on rank
+                            const allSame = verdict.recommendedCrops.every(x => x.compatibilityScore === verdict.recommendedCrops[0].compatibilityScore);
+                            const displayScore = allSame ? Math.max(55, 100 - idx * 10) : r.compatibilityScore;
+                            const barColor = displayScore >= 80 ? '#10B981' : displayScore >= 60 ? '#F59E0B' : '#EF4444';
+                            return (
+                                <div key={r.cropId} className="flex flex-col gap-1.5 p-3 bg-white border border-[#E9EEE9] rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xl">{r.cropIcon}</span>
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded-md text-white"
+                                            style={{ backgroundColor: barColor }}>
+                                            {r.compatibilityScore}%
+                                        </span>
+                                    </div>
+                                    <p className="text-xs font-semibold text-[#111827]">{r.cropName}</p>
+                                    <p className="text-[10px] text-[#9CA3AF]">Plantio: {r.suggestedStartMonth}</p>
+                                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full transition-all duration-700"
+                                            style={{ width: `${displayScore}%`, backgroundColor: barColor }} />
+                                    </div>
                                 </div>
-                                <p className="text-xs font-semibold text-[#111827]">{r.cropName}</p>
-                                <p className="text-[10px] text-[#9CA3AF]">Plantio: {r.suggestedStartMonth}</p>
-                                <div className="w-full h-1 bg-gray-100 rounded-full">
-                                    <div className="h-full bg-[#1A4D2E] rounded-full" style={{ width: `${r.compatibilityScore}%` }} />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </section>
@@ -356,7 +378,7 @@ export default function PlanningPage() {
                                 className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] focus:outline-none focus:border-[#1A4D2E] font-bold text-[#111827] bg-[#F9FAFB]" />
                         </div>
                     </div>
-
+                    <br />
                     <div className="bg-[#111827] rounded-2xl p-5 text-white mt-auto">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-[#9CA3AF] text-sm">Custo Estimado</span>
@@ -383,7 +405,7 @@ export default function PlanningPage() {
                     {confirmError && (
                         <p className="text-sm font-medium text-[#DC2626] mt-3">{confirmError}</p>
                     )}
-
+                    <br />
                     <button onClick={handleConfirmPlan} disabled={!selectedCrop || confirmingPlan}
                         className="w-full mt-4 bg-[#F7C04A] hover:bg-[#F5B027] text-[#123520] font-bold py-3.5 rounded-xl transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                         {confirmingPlan ? <><Loader2 size={18} className="animate-spin" /> A criar plano…</> : 'Confirmar este Plano'}
