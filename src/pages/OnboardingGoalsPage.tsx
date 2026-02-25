@@ -48,7 +48,7 @@ export default function OnboardingGoalsPage() {
         setLoading(true); setError('');
         try {
             await submitPhase3([...selected]);
-            navigate('/');
+            navigate('/dashboard');
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Erro ao guardar. Tente novamente.');
         } finally { setLoading(false); }
