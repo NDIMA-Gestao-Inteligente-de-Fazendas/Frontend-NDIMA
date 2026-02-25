@@ -28,6 +28,7 @@ import OnboardingGoalsPage from './pages/OnboardingGoalsPage';
 // Dashboard (private)
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardHomePage from './pages/DashboardHomePage';
+import PlanningPage from './pages/PlanningPage';
 
 function LandingPage() {
   return (
@@ -70,8 +71,7 @@ function App() {
           {/* Dashboard shell + sub-pages */}
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHomePage />} />
-            {/* Sub-pages added here as they are built */}
-            <Route path="planeamento" element={<ComingSoon label="Planeamento" />} />
+            <Route path="planeamento" element={<PlanningPage />} />
             <Route path="operacoes" element={<ComingSoon label="Operações" />} />
             <Route path="monitoramento" element={<ComingSoon label="Monitoramento" />} />
             <Route path="perfil" element={<ComingSoon label="Perfil" />} />
