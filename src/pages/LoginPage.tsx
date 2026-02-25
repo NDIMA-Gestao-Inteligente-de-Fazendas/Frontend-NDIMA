@@ -31,7 +31,7 @@ export default function LoginPage() {
                 password: form.senha,
             });
             if (user.onboardingCompleted) {
-                navigate('/');
+                navigate('/dashboard');
             } else {
                 navigate(ONBOARDING_ROUTES[user.onboardingStep] ?? '/onboarding');
             }

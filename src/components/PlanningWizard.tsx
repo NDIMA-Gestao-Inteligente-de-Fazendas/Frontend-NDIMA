@@ -2,19 +2,20 @@ import { useState, useEffect } from 'react';
 import {
     X, ChevronRight, ChevronLeft, MapPin, Sprout,
     AlertTriangle, TrendingUp, CheckCircle2, Calendar,
-    CloudRain, Leaf, Droplets, Combine, Share2, Download
+    CloudRain, Leaf, Droplets, Combine, Share2, Download, Loader2
 } from 'lucide-react';
+import { createPlan, type Crop, type Plan } from '../services/planningService';
 
-/* ─── Data ─────────────────────────────────────────────────── */
-const CROPS = [
-    { id: 'milho', name: 'Milho', icon: '🌽', color: '#FEF9C3', costPerHa: 450000, yieldPerHaKg: 5000, growWeeks: 16 },
-    { id: 'feijao', name: 'Feijão', icon: '🫘', color: '#FEF3C7', costPerHa: 350000, yieldPerHaKg: 1500, growWeeks: 12 },
-    { id: 'cafe', name: 'Café (Arábica)', icon: '☕', color: '#F5F0EB', costPerHa: 850000, yieldPerHaKg: 2000, growWeeks: 52 },
-    { id: 'mandioca', name: 'Mandioca', icon: '🍠', color: '#FFF7ED', costPerHa: 280000, yieldPerHaKg: 12000, growWeeks: 40 },
-    { id: 'tomate', name: 'Tomate', icon: '🍅', color: '#FEF2F2', costPerHa: 600000, yieldPerHaKg: 30000, growWeeks: 14 },
-    { id: 'banana', name: 'Banana', icon: '🍌', color: '#FFFBEB', costPerHa: 500000, yieldPerHaKg: 20000, growWeeks: 36 },
-    { id: 'soja', name: 'Soja', icon: '🌱', color: '#F0FDF4', costPerHa: 600000, yieldPerHaKg: 3500, growWeeks: 18 },
-    { id: 'amendoim', name: 'Amendoim', icon: '🥜', color: '#FFF7ED', costPerHa: 300000, yieldPerHaKg: 2000, growWeeks: 14 },
+/* ─── Data (fallback when no crops from API) ─────────────────── */
+const FALLBACK_CROPS: Crop[] = [
+    { id: 'milho', name: 'Milho', icon: '🌽', color: '#FEF9C3', costPerHa: 450000, yieldPerHaKg: 5000, growWeeks: 16, seedsPerHaKg: 20, fertilizerPerHaKg: 150, fuelPerHaL: 45, idealPhMin: 5.5, idealPhMax: 7.0, compatibleSoilTypes: [] },
+    { id: 'feijao', name: 'Feijão', icon: '🫘', color: '#FEF3C7', costPerHa: 350000, yieldPerHaKg: 1500, growWeeks: 12, seedsPerHaKg: 80, fertilizerPerHaKg: 80, fuelPerHaL: 30, idealPhMin: 6.0, idealPhMax: 7.5, compatibleSoilTypes: [] },
+    { id: 'cafe', name: 'Café (Arábica)', icon: '☕', color: '#F5F0EB', costPerHa: 850000, yieldPerHaKg: 2000, growWeeks: 52, seedsPerHaKg: 10, fertilizerPerHaKg: 200, fuelPerHaL: 60, idealPhMin: 5.0, idealPhMax: 6.5, compatibleSoilTypes: [] },
+    { id: 'mandioca', name: 'Mandioca', icon: '🍠', color: '#FFF7ED', costPerHa: 280000, yieldPerHaKg: 12000, growWeeks: 40, seedsPerHaKg: 300, fertilizerPerHaKg: 100, fuelPerHaL: 35, idealPhMin: 5.5, idealPhMax: 7.0, compatibleSoilTypes: [] },
+    { id: 'tomate', name: 'Tomate', icon: '🍅', color: '#FEF2F2', costPerHa: 600000, yieldPerHaKg: 30000, growWeeks: 14, seedsPerHaKg: 0.3, fertilizerPerHaKg: 180, fuelPerHaL: 40, idealPhMin: 6.0, idealPhMax: 7.0, compatibleSoilTypes: [] },
+    { id: 'banana', name: 'Banana', icon: '🍌', color: '#FFFBEB', costPerHa: 500000, yieldPerHaKg: 20000, growWeeks: 36, seedsPerHaKg: 0, fertilizerPerHaKg: 160, fuelPerHaL: 40, idealPhMin: 5.5, idealPhMax: 7.0, compatibleSoilTypes: [] },
+    { id: 'soja', name: 'Soja', icon: '🌱', color: '#F0FDF4', costPerHa: 600000, yieldPerHaKg: 3500, growWeeks: 18, seedsPerHaKg: 60, fertilizerPerHaKg: 120, fuelPerHaL: 45, idealPhMin: 6.0, idealPhMax: 7.0, compatibleSoilTypes: [] },
+    { id: 'amendoim', name: 'Amendoim', icon: '🥜', color: '#FFF7ED', costPerHa: 300000, yieldPerHaKg: 2000, growWeeks: 14, seedsPerHaKg: 120, fertilizerPerHaKg: 80, fuelPerHaL: 30, idealPhMin: 5.8, idealPhMax: 7.0, compatibleSoilTypes: [] },
 ];
 
 const LOADING_STEPS = [
@@ -25,7 +26,7 @@ const LOADING_STEPS = [
 ];
 
 interface PlanRecord {
-    crop: typeof CROPS[0];
+    crop: Crop;
     hectares: number;
     startDate: string;
     province: string;
@@ -37,7 +38,11 @@ interface PlanningWizardProps {
     onClose: () => void;
     defaultProvince?: string;
     defaultHectares?: number;
+    crops?: Crop[];
+    verdictText?: string;
+    aiSuggestions?: Record<string, string>;
     onPlanCreated?: (plan: PlanRecord) => void;
+    onPlanSaved?: (plan: Plan) => void;
 }
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -85,13 +90,19 @@ function StepIndicator({ current }: { current: Step }) {
 }
 
 /* ─── Step 1: Crop Selection ─────────────────────────────────── */
-function Step1({ onSelect }: { onSelect: (c: typeof CROPS[0]) => void }) {
+function Step1({ crops, onSelect }: { crops: Crop[]; onSelect: (c: Crop) => void }) {
+    if (crops.length === 0) return (
+        <div className="flex items-center justify-center gap-2 py-12">
+            <Loader2 size={20} className="animate-spin text-[#1A4D2E]" />
+            <span className="text-sm text-[#6B7280]">A carregar culturas…</span>
+        </div>
+    );
     return (
         <div className="animate-fade-in">
             <h2 className="text-2xl font-bold text-[#111827] font-['Outfit'] mb-1">O que quer plantar?</h2>
             <p className="text-[#6B7280] text-sm mb-8">Selecione a cultura para calcularmos a melhor estratégia para si.</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {CROPS.map(crop => (
+                {crops.map(crop => (
                     <button key={crop.id} onClick={() => onSelect(crop)}
                         className="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-[#F3F4F6] hover:border-[#1A4D2E] hover:shadow-md transition-all duration-200 group cursor-pointer"
                         style={{ backgroundColor: crop.color }}>
@@ -106,7 +117,7 @@ function Step1({ onSelect }: { onSelect: (c: typeof CROPS[0]) => void }) {
 
 /* ─── Step 2: Area & Date ────────────────────────────────────── */
 function Step2({ crop, hectares, setHectares, startDate, setStartDate, province, pricePerKg, setPricePerKg }: {
-    crop: typeof CROPS[0]; hectares: number; setHectares: (v: number) => void;
+    crop: Crop; hectares: number; setHectares: (v: number) => void;
     startDate: string; setStartDate: (v: string) => void; province: string;
     pricePerKg: number; setPricePerKg: (v: number) => void;
 }) {
@@ -273,15 +284,23 @@ function Step4({ plan }: { plan: PlanRecord }) {
 }
 
 /* ─── Step 5: Timeline Result ────────────────────────────────── */
-function Step5({ plan }: { plan: PlanRecord }) {
+function Step5({ plan, savedPlan }: { plan: PlanRecord; savedPlan: Plan | null }) {
     const startDate = new Date(plan.startDate);
-    const timeline = [
-        { week: 1, icon: '🪛', color: '#F59E0B', phase: 'Preparação', label: 'Preparação do solo, compra e organização de insumos.', date: addWeeks(plan.startDate, 0) },
-        { week: 2, icon: '🌱', color: '#10B981', phase: 'Plantio', label: `Data ideal para o plantio de ${plan.crop.name}.`, date: addWeeks(plan.startDate, 2) },
-        { week: 6, icon: '💧', color: '#3B82F6', phase: '1ª Adubação', label: 'Primeira cobertura com NPK. Monitorar humidade.', date: addWeeks(plan.startDate, 6) },
-        { week: 10, icon: '🔍', color: '#8B5CF6', phase: 'Monitorização', label: 'Inspecionar pragas e doenças. 2ª adubação se necessário.', date: addWeeks(plan.startDate, 10) },
-        { week: plan.crop.growWeeks, icon: '🌾', color: '#1A4D2E', phase: 'Colheita', label: `Janela de colheita estimada. Produção esperada: ${(plan.crop.yieldPerHaKg * plan.hectares).toLocaleString('pt-AO')} kg.`, date: addWeeks(plan.startDate, plan.crop.growWeeks) },
+
+    // Use API timeline if available, else compute locally
+    const apiTimeline = savedPlan?.timeline ?? null;
+    const localTimeline = [
+        { week: 1, phase: 'Preparação', label: 'Preparação do solo, compra e organização de insumos.', date: addWeeks(plan.startDate, 0) },
+        { week: 2, phase: 'Plantio', label: `Data ideal para o plantio de ${plan.crop.name}.`, date: addWeeks(plan.startDate, 2) },
+        { week: 6, phase: '1ª Adubação', label: 'Primeira cobertura com NPK. Monitorar humidade.', date: addWeeks(plan.startDate, 6) },
+        { week: 10, phase: 'Monitorização', label: 'Inspecionar pragas e doenças. 2ª adubação se necessário.', date: addWeeks(plan.startDate, 10) },
+        { week: plan.crop.growWeeks, phase: 'Colheita', label: `Janela de colheita. Produção esperada: ${(plan.crop.yieldPerHaKg * plan.hectares).toLocaleString('pt-AO')} kg.`, date: addWeeks(plan.startDate, plan.crop.growWeeks) },
     ];
+    const timeline = apiTimeline
+        ? apiTimeline.map(t => ({ ...t, label: '', date: new Date(t.date).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' }) }))
+        : localTimeline;
+
+    const colors = ['#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#1A4D2E'];
 
     return (
         <div className="animate-fade-in">
@@ -294,22 +313,23 @@ function Step5({ plan }: { plan: PlanRecord }) {
             </p>
 
             <div className="relative pl-6 border-l-2 border-[#E5E7EB] flex flex-col gap-6 mb-8">
-                {timeline.map((t) => (
-                    <div key={t.week} className="relative">
+                {timeline.map((t, i) => (
+                    <div key={i} className="relative">
                         <div className="absolute -left-[35px] top-0.5 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center shadow-sm text-xs"
-                            style={{ backgroundColor: t.color }}>
-                            {t.week === plan.crop.growWeeks ? <Combine size={12} className="text-white" /> :
-                                t.week === 2 ? <Sprout size={12} className="text-white" /> :
+                            style={{ backgroundColor: colors[Math.min(i, colors.length - 1)] }}>
+                            {i === timeline.length - 1 ? <Combine size={12} className="text-white" /> :
+                                i === 1 ? <Sprout size={12} className="text-white" /> :
                                     <Droplets size={12} className="text-white" />}
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white text-[10px]" style={{ backgroundColor: t.color }}>
+                                <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white text-[10px]"
+                                    style={{ backgroundColor: colors[Math.min(i, colors.length - 1)] }}>
                                     {t.phase}
                                 </span>
                                 <span className="flex items-center gap-1 text-xs text-[#9CA3AF]"><Calendar size={10} /> {t.date}</span>
                             </div>
-                            <p className="text-sm text-[#4B5563] mt-1 leading-relaxed">{t.label}</p>
+                            {t.label && <p className="text-sm text-[#4B5563] mt-1 leading-relaxed">{t.label}</p>}
                         </div>
                     </div>
                 ))}
@@ -328,17 +348,24 @@ function Step5({ plan }: { plan: PlanRecord }) {
 }
 
 /* ─── Main Wizard ────────────────────────────────────────────── */
-export default function PlanningWizard({ isOpen, onClose, defaultProvince = 'Angola', defaultHectares = 10, onPlanCreated }: PlanningWizardProps) {
+export default function PlanningWizard({
+    isOpen, onClose, defaultProvince = 'Angola', defaultHectares = 10,
+    crops, verdictText, aiSuggestions = {}, onPlanCreated, onPlanSaved
+}: PlanningWizardProps) {
+    const activeCrops = crops && crops.length > 0 ? crops : FALLBACK_CROPS;
     const [step, setStep] = useState<Step>(1);
-    const [selectedCrop, setSelectedCrop] = useState<typeof CROPS[0] | null>(null);
+    const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
     const [hectares, setHectares] = useState(defaultHectares);
     const [pricePerKg, setPricePerKg] = useState(150);
     const today = new Date().toISOString().split('T')[0];
     const [startDate, setStartDate] = useState(today);
+    const [creating, setCreating] = useState(false);
+    const [createError, setCreateError] = useState('');
+    const [savedPlan, setSavedPlan] = useState<Plan | null>(null);
 
     // Reset when reopened
     useEffect(() => {
-        if (isOpen) { setStep(1); setSelectedCrop(null); setHectares(defaultHectares); setStartDate(today); }
+        if (isOpen) { setStep(1); setSelectedCrop(null); setHectares(defaultHectares); setStartDate(today); setSavedPlan(null); setCreateError(''); }
     }, [isOpen, defaultHectares, today]);
 
     if (!isOpen) return null;
@@ -347,14 +374,39 @@ export default function PlanningWizard({ isOpen, onClose, defaultProvince = 'Ang
         crop: selectedCrop, hectares, startDate, province: defaultProvince, pricePerKg
     } : null;
 
-    const handleCropSelect = (crop: typeof CROPS[0]) => {
+    const handleCropSelect = (crop: Crop) => {
         setSelectedCrop(crop);
+        // Pre-fill start date from AI suggestion if available
+        if (aiSuggestions[crop.id]) setStartDate(aiSuggestions[crop.id]);
         setStep(2);
     };
 
-    const handleNext = () => {
-        if (step === 2) setStep(3); // trigger loading
-        else if (step === 4) { setStep(5); if (plan) onPlanCreated?.(plan); }
+    const handleNext = async () => {
+        if (step === 2) {
+            setStep(3); // trigger loading animation
+        } else if (step === 4) {
+            if (!plan || !selectedCrop) return;
+            setCreating(true);
+            setCreateError('');
+            try {
+                const created = await createPlan({
+                    cropId: selectedCrop.id,
+                    hectares,
+                    startDate,
+                    pricePerKgAoa: pricePerKg,
+                    province: defaultProvince ?? 'Angola',
+                    aiVerdictUsed: verdictText,
+                });
+                setSavedPlan(created);
+                onPlanCreated?.(plan);
+                onPlanSaved?.(created);
+                setStep(5);
+            } catch (e) {
+                setCreateError(e instanceof Error ? e.message : 'Erro ao guardar o plano. Tente novamente.');
+            } finally {
+                setCreating(false);
+            }
+        }
     };
 
     const handleBack = () => {
@@ -392,15 +444,22 @@ export default function PlanningWizard({ isOpen, onClose, defaultProvince = 'Ang
                         {step !== 3 && <StepIndicator current={step} />}
 
                         {/* Steps */}
-                        {step === 1 && <Step1 onSelect={handleCropSelect} />}
+                        {step === 1 && <Step1 crops={activeCrops} onSelect={handleCropSelect} />}
                         {step === 2 && selectedCrop && (
                             <Step2 crop={selectedCrop} hectares={hectares} setHectares={setHectares}
                                 startDate={startDate} setStartDate={setStartDate} province={defaultProvince}
                                 pricePerKg={pricePerKg} setPricePerKg={setPricePerKg} />
                         )}
                         {step === 3 && <Step3 onDone={() => setStep(4)} />}
-                        {step === 4 && plan && <Step4 plan={plan} />}
-                        {step === 5 && plan && <Step5 plan={plan} />}
+                        {step === 4 && plan && (
+                            <>
+                                <Step4 plan={plan} />
+                                {createError && (
+                                    <p className="text-sm font-medium text-[#DC2626] mt-3 text-center">{createError}</p>
+                                )}
+                            </>
+                        )}
+                        {step === 5 && plan && <Step5 plan={plan} savedPlan={savedPlan} />}
                     </div>
 
                     {/* Footer nav */}
@@ -413,10 +472,11 @@ export default function PlanningWizard({ isOpen, onClose, defaultProvince = 'Ang
                                 </button>
                             )}
                             {showNext && (
-                                <button onClick={handleNext}
-                                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#1A4D2E] hover:bg-[#123520] text-white font-bold transition-colors text-sm shadow-md">
-                                    {step === 4 ? 'Confirmar e Gerar Cronograma' : 'Analisar Viabilidade'}
-                                    <ChevronRight size={16} />
+                                <button onClick={handleNext} disabled={creating}
+                                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#1A4D2E] hover:bg-[#123520] text-white font-bold transition-colors text-sm shadow-md disabled:opacity-60">
+                                    {creating
+                                        ? <><Loader2 size={16} className="animate-spin" /> A guardar…</>
+                                        : <>{step === 4 ? 'Confirmar e Gerar Cronograma' : 'Analisar Viabilidade'}<ChevronRight size={16} /></>}
                                 </button>
                             )}
                             {isStep5 && (
