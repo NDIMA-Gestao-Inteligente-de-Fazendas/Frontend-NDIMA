@@ -29,6 +29,7 @@ import OnboardingGoalsPage from './pages/OnboardingGoalsPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardHomePage from './pages/DashboardHomePage';
 import PlanningPage from './pages/PlanningPage';
+import OperacoesPage from './pages/OperacoesPage'; // Força atualização do TS Server
 import MonitoramentoPage from './pages/MonitoramentoPage';
 import MonitoramentoSatelitePage from './pages/MonitoramentoSatelitePage';
 import MonitoramentoProducaoPage from './pages/MonitoramentoProducaoPage';
@@ -75,7 +76,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHomePage />} />
             <Route path="planeamento" element={<PlanningPage />} />
-            <Route path="operacoes" element={<ComingSoon label="Operações" />} />
+            <Route path="operacoes" element={<OperacoesPage />} />
             <Route path="monitoramento" element={<MonitoramentoPage />}>
               <Route index element={<Navigate to="satelite" replace />} />
               <Route path="satelite" element={<MonitoramentoSatelitePage />} />
