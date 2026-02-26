@@ -58,25 +58,13 @@ export default function OnboardingGoalsPage() {
         <div className="min-h-screen flex font-['Inter']" style={{ animation: 'slideIn 0.4s ease' }}>
             <style>{`@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}`}</style>
 
-            {/* ── Left brand panel ── */}
-            <div className="hidden md:flex flex-col justify-between w-[45%] p-12"
-                style={{ background: 'linear-gradient(145deg, #1A4D2E 0%, #0d2a18 100%)' }}>
-                <div className="flex flex-col gap-6">
-                    <img src="/img/logotipofinal-04.png" alt="NDIMA" className="h-14 w-auto object-contain" />
-                    <div className="flex items-center mt-2">
-                        {[1, 2, 3].map(n => <StepDot key={n} n={n} current={3} />)}
-                    </div>
-                </div>
-                <div>
-                    <div className="text-7xl mb-6">🎯</div>
-                    <h2 className="text-4xl font-bold text-white font-['Outfit'] leading-snug mb-4">
-                        Qual o seu maior objetivo?
-                    </h2>
-                    <p className="text-white/60 text-lg leading-relaxed">
-                        Vamos alcançá-lo, juntos. A NDIMA vai trabalhar para tornar a sua fazenda mais produtiva e lucrativa.
-                    </p>
-                </div>
-                <p className="text-white/30 text-sm">© {new Date().getFullYear()} NDIMA. Todos os direitos reservados.</p>
+            {/* ── Left image panel ── */}
+            <div className="hidden md:block w-[45%] relative overflow-hidden">
+                <img
+                    src="/img/fase3.png"
+                    alt="Fase 3 NDIMA"
+                    className="absolute inset-0 w-full h-full object-cover object-center"
+                />
             </div>
 
             {/* ── Right form panel ── */}
