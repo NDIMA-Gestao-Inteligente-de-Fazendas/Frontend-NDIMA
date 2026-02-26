@@ -62,39 +62,13 @@ export default function RegisterPage() {
     return (
         <div className="min-h-screen flex font-['Inter']">
 
-            {/* ── Left brand panel ── */}
-            <div
-                className="hidden md:flex flex-col justify-between w-[45%] p-12"
-                style={{ background: 'linear-gradient(145deg, #1A4D2E 0%, #0d2a18 100%)' }}
-            >
-                <img src="/img/logotipofinal-04.png" alt="NDIMA" className="h-14 w-auto object-contain" />
-
-                <div>
-                    <h2 className="text-4xl font-bold text-white font-['Outfit'] leading-snug mb-4">
-                        Comece hoje a transformar a sua fazenda.
-                    </h2>
-                    <p className="text-white/60 text-lg leading-relaxed">
-                        Crie a sua conta gratuitamente e tenha acesso à plataforma completa por 30 dias.
-                    </p>
-                    <div className="flex flex-col gap-3 mt-8">
-                        {[
-                            'Sem cartão de crédito',
-                            'Configuração em menos de 1 minuto',
-                            'Cancele quando quiser',
-                        ].map((item, i) => (
-                            <div key={i} className="flex items-center gap-3">
-                                <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F7C04A' }}>
-                                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                        <path d="M1 4L3.5 6.5L9 1" stroke="#123520" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </div>
-                                <span className="text-white/80 text-sm">{item}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <p className="text-white/30 text-sm">© {new Date().getFullYear()} NDIMA. Todos os direitos reservados.</p>
+            {/* ── Left image panel ── */}
+            <div className="hidden md:block w-[45%] relative overflow-hidden">
+                <img
+                    src="/img/cadastro.png"
+                    alt="NDIMA Cadastro"
+                    className="absolute inset-0 w-full h-full object-cover object-center"
+                />
             </div>
 
             {/* ── Right form panel ── */}

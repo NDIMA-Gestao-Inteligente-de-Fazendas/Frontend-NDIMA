@@ -46,23 +46,13 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex font-['Inter']">
 
-            {/* ── Left brand panel ── */}
-            <div
-                className="hidden md:flex flex-col justify-between w-[45%] p-12"
-                style={{ background: 'linear-gradient(145deg, #1A4D2E 0%, #0d2a18 100%)' }}
-            >
-                <img src="/img/logotipofinal-04.png" alt="NDIMA" className="h-14 w-auto object-contain" />
-
-                <div>
-                    <h2 className="text-4xl font-bold text-white font-['Outfit'] leading-snug mb-4">
-                        Bem-vindo de volta ao futuro da agricultura.
-                    </h2>
-                    <p className="text-white/60 text-lg leading-relaxed">
-                        Aceda aos dados da sua fazenda, monitore culturas e gerencie o seu negócio.
-                    </p>
-                </div>
-
-                <p className="text-white/30 text-sm">© {new Date().getFullYear()} NDIMA. Todos os direitos reservados.</p>
+            {/* ── Left image panel ── */}
+            <div className="hidden md:block w-[45%] relative overflow-hidden">
+                <img
+                    src="/img/login.png"
+                    alt="NDIMA Login"
+                    className="absolute inset-0 w-full h-full object-cover object-center"
+                />
             </div>
 
             {/* ── Right form panel ── */}
