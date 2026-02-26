@@ -18,23 +18,7 @@ const PRODUCTS = [
     { label: 'Sorgo', emoji: '🌿' },
 ];
 
-function StepDot({ n, current }: { n: number; current: number }) {
-    const done = n < current;
-    const active = n === current;
-    return (
-        <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
-                style={{
-                    backgroundColor: done || active ? '#F7C04A' : 'rgba(255,255,255,0.15)',
-                    color: done || active ? '#123520' : 'rgba(255,255,255,0.5)',
-                }}>
-                {done ? '✓' : n}
-            </div>
-            {n < 3 && <div className="w-10 h-0.5 transition-all duration-500"
-                style={{ backgroundColor: done ? '#F7C04A' : 'rgba(255,255,255,0.15)' }} />}
-        </div>
-    );
-}
+
 
 export default function OnboardingProductsPage() {
     const navigate = useNavigate();
