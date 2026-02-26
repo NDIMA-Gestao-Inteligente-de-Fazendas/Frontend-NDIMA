@@ -4,6 +4,7 @@ import {
     TrendingUp, AlertTriangle, Droplets, Leaf, ChevronRight
 } from 'lucide-react';
 import WeatherCard from '../components/WeatherCard';
+import NdimaAgent from '../components/NdimaAgent';
 import {
     getMe, getDashboardStats, getFarmHealthHistory, getNotifications, getUnreadCount,
     type UserProfile, type DashboardStats, type FarmHealthHistory, type Notification,
@@ -171,10 +172,13 @@ export default function DashboardHomePage() {
                         {dateLabel}
                     </p>
                 </div>
-                <div className="flex items-center gap-3 bg-white border border-[#E9EEE9] rounded-2xl px-5 py-3 shadow-sm select-none">
-                    <Bell size={18} className="text-[#1A4D2E]" />
-                    <span className="text-sm font-semibold text-[#111827]">{unreadCount} alertas</span>
-                    {unreadCount > 0 && <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] animate-pulse" />}
+                <div className="flex items-center gap-3">
+                    <NdimaAgent />
+                    <div className="flex items-center gap-3 bg-white border border-[#E9EEE9] rounded-2xl px-5 py-3 shadow-sm select-none">
+                        <Bell size={18} className="text-[#1A4D2E]" />
+                        <span className="text-sm font-semibold text-[#111827]">{unreadCount} alertas</span>
+                        {unreadCount > 0 && <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] animate-pulse" />}
+                    </div>
                 </div>
             </header>
 

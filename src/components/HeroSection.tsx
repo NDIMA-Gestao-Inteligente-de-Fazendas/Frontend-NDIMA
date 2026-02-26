@@ -20,17 +20,6 @@ export default function HeroSection() {
 
                     {/* Left: Copy */}
                     <div className="text-center md:text-left">
-                        {/* <div
-                            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8 border text-sm font-semibold tracking-wide uppercase"
-                            style={{
-                                backgroundColor: 'rgba(26,77,46,0.08)',
-                                borderColor: 'rgba(26,77,46,0.2)',
-                                color: '#1A4D2E'
-                            }}
-                        >
-                            Plataforma Agrotech Nº 1 em África
-                        </div> */}
-
                         <h1 className="text-4xl lg:text-6xl font-bold leading-[1.1] mb-6 text-[#111827] font-['Outfit'] tracking-tight text-left">
                             Transforme a sua fazenda numa{' '}
                             <span className="relative inline-block" style={{ color: '#1A4D2E' }}>
@@ -62,70 +51,70 @@ export default function HeroSection() {
                                 <Play size={18} /> Ver Demonstração
                             </button>
                         </div>
-
-
                     </div>
 
-                    {/* Right: Phone mockup */}
-                    <div className="flex justify-center items-center mt-8 md:mt-0">
-                        <div className="relative">
-                            {/* Glow behind phone */}
-                            <div
-                                className="absolute inset-0 rounded-[50px] blur-[40px] opacity-30 scale-90"
-                                style={{ backgroundColor: '#1A4D2E' }}
-                            />
-                            {/* Phone shell */}
-                            <div
-                                className="relative z-10 w-[260px] h-[540px] rounded-[44px] border-[8px] border-white shadow-2xl overflow-hidden"
-                                style={{ backgroundColor: '#1a1a1a' }}
-                            >
-                                {/* Notch */}
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-white rounded-b-2xl z-20" />
+                    {/* Right: Farmer + tilted phone — hidden on mobile */}
+                    <div className="hidden md:flex justify-center items-end">
+                        {/* ── Desktop: overlapping composition ── */}
+                        <div className="relative" style={{ width: 420, height: 560 }}>
 
-                                {/* App UI */}
-                                <div className="w-full h-full pt-8 px-3 pb-3 flex flex-col gap-3" style={{ backgroundColor: '#f3f4f6' }}>
-                                    <div className="flex items-center gap-2 px-1">
-                                        <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#2A6A42' }} />
-                                        <div className="h-2 flex-1 rounded-md bg-gray-300" />
-                                    </div>
-                                    <div className="rounded-xl p-4 shadow text-white" style={{ backgroundColor: '#1A4D2E' }}>
-                                        <div className="text-[10px] opacity-60 mb-1">Receita este mês</div>
-                                        <div className="text-2xl font-bold">AOA 1.24M</div>
-                                        <div className="text-xs mt-1" style={{ color: '#F7C04A' }}>↑ 18% vs mês anterior</div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="bg-white rounded-xl p-3 shadow-sm">
-                                            <div className="text-[9px] text-gray-400 mb-1">Parcelas</div>
-                                            <div className="text-lg font-bold text-[#111827]">12</div>
+                            {/* Glow blob */}
+                            <div
+                                className="absolute inset-0 rounded-full blur-[60px] opacity-20 pointer-events-none"
+                                style={{ backgroundColor: '#1A4D2E', transform: 'scale(0.85)' }}
+                            />
+
+                            {/* Phone — tilted 10°, right side */}
+                            <div className="absolute" style={{ right: 0, bottom: 0, zIndex: 5, transform: 'rotate(10deg)', transformOrigin: 'bottom right' }}>
+                                <div className="w-[230px] h-[480px] rounded-[44px] border-[8px] border-white shadow-2xl overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-white rounded-b-2xl z-20" />
+                                    <div className="w-full h-full pt-8 px-3 pb-3 flex flex-col gap-3" style={{ backgroundColor: '#f3f4f6' }}>
+                                        <div className="flex items-center gap-2 px-1">
+                                            <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#2A6A42' }} />
+                                            <div className="h-2 flex-1 rounded-md bg-gray-300" />
+                                        </div>
+                                        <div className="rounded-xl p-4 shadow text-white" style={{ backgroundColor: '#1A4D2E' }}>
+                                            <div className="text-[10px] opacity-60 mb-1">Receita este mês</div>
+                                            <div className="text-2xl font-bold">AOA 1.24M</div>
+                                            <div className="text-xs mt-1" style={{ color: '#F7C04A' }}>↑ 18% vs mês anterior</div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="bg-white rounded-xl p-3 shadow-sm">
+                                                <div className="text-[9px] text-gray-400 mb-1">Parcelas</div>
+                                                <div className="text-lg font-bold text-[#111827]">12</div>
+                                            </div>
+                                            <div className="bg-white rounded-xl p-3 shadow-sm">
+                                                <div className="text-[9px] text-gray-400 mb-1">Alertas</div>
+                                                <div className="text-lg font-bold" style={{ color: '#D4A030' }}>2</div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white rounded-xl p-3 h-24 flex items-end gap-1.5 shadow-sm">
+                                            {[40, 65, 48, 85, 55, 90, 70].map((h, i) => (
+                                                <div key={i} className="flex-1 rounded-t transition-all"
+                                                    style={{ height: `${h}%`, backgroundColor: i === 5 ? '#F7C04A' : i % 2 === 0 ? '#d1fae5' : '#2A6A42' }} />
+                                            ))}
                                         </div>
                                         <div className="bg-white rounded-xl p-3 shadow-sm">
-                                            <div className="text-[9px] text-gray-400 mb-1">Alertas</div>
-                                            <div className="text-lg font-bold" style={{ color: '#D4A030' }}>2</div>
+                                            <div className="text-[9px] text-gray-400 mb-2">Saúde NDVI – Campo A</div>
+                                            <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                                                <div className="h-full rounded-full" style={{ width: '78%', backgroundColor: '#1A4D2E' }} />
+                                            </div>
+                                            <div className="text-right text-[9px] mt-1 font-bold" style={{ color: '#1A4D2E' }}>78% Ótimo</div>
                                         </div>
-                                    </div>
-                                    <div className="bg-white rounded-xl p-3 h-28 flex items-end gap-1.5 shadow-sm">
-                                        {[40, 65, 48, 85, 55, 90, 70].map((h, i) => (
-                                            <div
-                                                key={i}
-                                                className="flex-1 rounded-t transition-all"
-                                                style={{
-                                                    height: `${h}%`,
-                                                    backgroundColor: i === 5 ? '#F7C04A' : i % 2 === 0 ? '#d1fae5' : '#2A6A42'
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                    <div className="bg-white rounded-xl p-3 shadow-sm">
-                                        <div className="text-[9px] text-gray-400 mb-2">Saúde NDVI – Campo A</div>
-                                        <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-                                            <div className="h-full rounded-full" style={{ width: '78%', backgroundColor: '#1A4D2E' }} />
-                                        </div>
-                                        <div className="text-right text-[9px] mt-1 font-bold" style={{ color: '#1A4D2E' }}>78% Ótimo</div>
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Agricultor — left side, in front */}
+                            <img
+                                src="/img/agricultor.png"
+                                alt="Agricultor NDIMA"
+                                className="absolute pointer-events-none select-none"
+                                style={{ bottom: 0, left: -10, height: '640px', width: 'auto', zIndex: 15, objectFit: 'contain', objectPosition: 'bottom', filter: 'drop-shadow(0 16px 40px rgba(0,0,0,0.18))' }}
+                            />
                         </div>
                     </div>
+
                 </div>
             </div>
         </section>

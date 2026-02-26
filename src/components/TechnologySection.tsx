@@ -81,61 +81,26 @@ export default function TechnologySection() {
                     </div>
 
                     {/* ── Right column — visual ── */}
-                    <div className="relative h-[420px] flex justify-center items-center">
+                    <div className="relative flex justify-center items-center py-8">
                         {/* Subtle radial glow */}
                         <div
                             className="absolute inset-0 rounded-3xl"
                             style={{ background: 'radial-gradient(circle at 50% 60%, rgba(26,77,46,0.06) 0%, transparent 70%)' }}
                         />
 
-                        {/* Earth arc */}
-                        <div
-                            className="absolute bottom-[-120px] left-1/2 -translate-x-1/2 w-[520px] h-[260px] rounded-[50%] opacity-10"
-                            style={{ backgroundColor: '#2A6A42' }}
-                        />
-
-                        {/* Beam */}
-                        <div
-                            className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[90px] h-[220px]"
+                        {/* Satellite image with float animation */}
+                        <img
+                            src="/img/SATELITE.png"
+                            alt="Satélite AngoSat-2"
+                            className="w-full"
                             style={{
-                                background: 'linear-gradient(to bottom, rgba(247,192,74,0.4), transparent)',
-                                clipPath: 'polygon(35% 0, 65% 0, 100% 100%, 0% 100%)',
-                                animation: 'pulse-beam 3.5s infinite alternate',
+                                maxHeight: '340px',
+                                width: 'auto',
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 12px 32px rgba(26,77,46,0.25))',
+                                animation: 'float-sat 6s ease-in-out infinite',
                             }}
                         />
-
-                        {/* Satellite icon + label */}
-                        <div
-                            className="absolute top-[18%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-                            style={{ animation: 'float-sat 6s ease-in-out infinite' }}
-                        >
-                            <Satellite size={90} color="#1A4D2E" strokeWidth={1.5} />
-                            <span
-                                className="text-[11px] font-bold tracking-widest uppercase px-3 py-1 rounded-full"
-                                style={{ backgroundColor: 'rgba(26,77,46,0.1)', color: '#1A4D2E' }}
-                            >
-                                AngoSat-2
-                            </span>
-                        </div>
-
-                        {/* Ground signal dots */}
-                        {[
-                            { left: '28%', delay: '0s', dur: '2.2s' },
-                            { left: '50%', delay: '0.8s', dur: '2.8s' },
-                            { left: '72%', delay: '0.4s', dur: '2.4s' },
-                        ].map((dot, i) => (
-                            <div
-                                key={i}
-                                className="absolute w-3 h-3 rounded-full"
-                                style={{
-                                    bottom: '28%',
-                                    left: dot.left,
-                                    backgroundColor: '#F7C04A',
-                                    boxShadow: '0 0 14px #F7C04A',
-                                    animation: `twinkle-point ${dot.dur} infinite ${dot.delay}`,
-                                }}
-                            />
-                        ))}
                     </div>
                 </div>
             </div>

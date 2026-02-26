@@ -269,7 +269,7 @@ export default function PlanningPage() {
                     <span className="text-xl shrink-0">🤖</span>
                     <div className="flex-1">
                         <p className="text-sm font-semibold text-[#111827] flex items-center gap-2">
-                            Veredito NDIMA IA
+                            NDIMA AGENTE-IA
                             {verdict?.source === 'rule-based' && (
                                 <span className="text-[10px] font-normal text-[#9CA3AF]">(baseado em regras)</span>
                             )}
